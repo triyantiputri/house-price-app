@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prediksi Harga Rumah</title>
+<style>
+  :root{--bg:#f4f6fb;--card:#fff;--text:#1d2433;--muted:#667085;--accent:#3b5bdb;--border:#d9deea}
+  @media (prefers-color-scheme:dark){:root{--bg:#10131a;--card:#1a1f2b;--text:#e8ebf3;--muted:#98a2b3;--accent:#748ffc;--border:#2c3345}}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);padding:24px 16px}
+  .card{max-width:640px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px}
+  h1{margin:0 0 4px;font-size:1.5rem} p.sub{margin:0 0 20px;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+  input,select{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:1rem}
+  button{margin-top:20px;width:100%;padding:12px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-size:1rem;cursor:pointer}
+  #result{margin-top:20px;padding:16px;border-radius:10px;background:var(--bg);text-align:center;display:none}
+  #result .price{font-size:1.8rem;font-weight:700;color:var(--accent)}
+  .warn{background:#fff3cd;color:#664d03;padding:10px;border-radius:8px;margin-bottom:16px}
+  @media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Prediksi Harga Rumah</h1>
+  <p class="sub">Isi karakteristik properti untuk mendapatkan estimasi harga.</p>
+  {% if not model_ready %}<div class="warn">Model belum dimuat. Letakkan file model di folder <code>model/</code>.</div>{% endif %}
+  <div class="grid">
+    <div><label>Luas area</label><input id="area" type="number" value="5000" min="1"></div>
+    <div><label>Kamar tidur</label><input id="bedrooms" type="number" value="3" min="0"></div>
+    <div><label>Kamar mandi</label><input id="bathrooms" type="number" value="2" min="0"></div>
+    <div><label>Jumlah lantai</label><input id="stories" type="number" value="2" min="1"></div>
+    <div><label>Tempat parkir</label><input id="parking" type="number" value="1" min="0"></div>
+    <div><label>Furnishing</label>
+      <select id="furnishingstatus"><option value="furnished">Furnished</option><option value="semi-furnished">Semi-furnished</option><option value="unfurnished">Unfurnished</option></select></div>
+    <div><label>Akses jalan utama</label><select id="mainroad"><option value="yes">Ya</option><option value="no">Tidak</option></select></div>
+    <div><label>Ruang tamu tambahan</label><select id="guestroom"><option value="no">Tidak</option><option value="yes">Ya</option></select></div>
+    <div><label>Basement</label><select id="basement"><option value="no">Tidak</option><option value="yes">Ya</option></select></div>
+    <div><label>Pemanas air</label><select id="hotwaterheating"><option value="no">Tidak</option><option value="yes">Ya</option></select></div>
+    <div><label>AC</label><select id="airconditioning"><option value="no">Tidak</option><option value="yes">Ya</option></select></div>
+    <div><label>Area pilihan (prefarea)</label><select id="prefarea"><option value="no">Tidak</option><option value="yes">Ya</option></select></div>
+  </div>
+  <button id="btn">Prediksi Harga</button>
+  <div id="result"><div>Estimasi harga</div><div class="price" id="price"></div></div>
+</div>
+<script>
+const ids=["area","bedrooms","bathrooms","stories","parking","furnishingstatus","mainroad","guestroom","basement","hotwaterheating","airconditioning","prefarea"];
+document.getElementById("btn").addEventListener("click", async () => {
+  const body={}; ids.forEach(i=>body[i]=document.getElementById(i).value);
+  const out=document.getElementById("result"), price=document.getElementById("price");
+  out.style.display="block"; price.textContent="Menghitung...";
+  try{
+    const r=await fetch("/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const d=await r.json();
+    price.textContent=r.ok?Number(d.predicted_price).toLocaleString("id-ID"):d.error;
+  }catch(e){price.textContent="Gagal menghubungi server.";}
+});
+</script>
+</body>
+</html>
