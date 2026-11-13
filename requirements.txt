@@ -1,7 +1,8 @@
 flask>=3.0
+gunicorn
 pandas>=2.0
 numpy>=1.24
 scikit-learn>=1.3
 joblib>=1.3
-# xgboost>=2.0   # aktifkan jika model utama Anda XGBoost
-# torch          # aktifkan hanya jika model berupa PyTorch
+xgboost>=2.0   # wajib: pipeline di notebook memuat XGBRegressor (juga untuk Voting Ensemble)
+# Samakan versi scikit-learn & xgboost dengan Colab agar model.pth bisa dimuat
